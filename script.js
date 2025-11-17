@@ -32,18 +32,29 @@ numberBtns.forEach((e) => {
 // Operator buttons
 operatorBtns.forEach((e) => {
     e.addEventListener("click", () => {
-        lastNumber = currentNumber;
-        currentNumber = "";
-        operatorSign = e.textContent;
+
+        if (currentNumber !== "" && lastNumber !== "") {
+            display.textContent = operation(lastNumber, currentNumber, operatorSign)
+            lastNumber = operation(lastNumber, currentNumber, operatorSign)
+            currentNumber = "";
+            operatorSign = e.textContent;
+        } else {
+            operatorSign = e.textContent;
+            lastNumber = currentNumber;
+            currentNumber = "";
+        }
     })
 })
 
 // Equal button
 equalBtn.addEventListener("click", () => {
-    display.textContent = operation(lastNumber, currentNumber, operatorSign);
-    currentNumber = "";
-    lastNumber = "";
-    operatorSign = "";
+    // Only runs if operator has been selected
+    if (operatorSign !== "") {
+        display.textContent = operation(lastNumber, currentNumber, operatorSign);
+        currentNumber = "";
+        lastNumber = "";
+        operatorSign = "";
+    }
 })
 
 // Clear button
@@ -67,5 +78,8 @@ function operation(num1, num2, operator) {
     switch (operator) {
         case "+":
             return add(num1, num2);
-    }
+
+        case "-":
+            return subtract(num1, num2);
+    }   
 }
