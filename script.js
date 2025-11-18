@@ -1,48 +1,56 @@
 const display = document.querySelector("#display");
 
-let currentNumber = "";
+let currentNumber = "0";
 let lastNumber = "";
-let operatorSign = "";
+let operatorSign = null;
 
 const numberBtns = document.querySelectorAll(".number-button");
 const operatorBtns = document.querySelectorAll(".operator-button");
 const equalBtn = document.querySelector(".equal-button");
 const clearBtn = document.querySelector(".clear-button");
+const operatorSelected = document.querySelector(".operator-selected");
+
+let result = false;
 
 // Number buttons
 numberBtns.forEach((e) => {
     e.addEventListener("click", () => {
 
-        // Wipes the initial zero in the display
-        if (display.textContent === "0") {
-            display.textContent = "";
+        if (result === true) {
+            currentNumber = "";
+            result = false;
         }
 
-        // Adds the selected button number to current number
-        // Stops inputs past 15 digits
-        if (display.textContent.length < 15) {
-            currentNumber += e.textContent;
-            display.textContent = currentNumber;
+        if (currentNumber === "0") {
+            currentNumber = e.textContent;
         } else {
-            alert("Can't enter more than 15 digits");
+            currentNumber += e.textContent;
         }
+
+        display.textContent = currentNumber;
     })
 });
 
 // Operator buttons
 operatorBtns.forEach((e) => {
     e.addEventListener("click", () => {
-
-        if (currentNumber !== "" && lastNumber !== "") {
-            display.textContent = operation(lastNumber, currentNumber, operatorSign)
-            lastNumber = operation(lastNumber, currentNumber, operatorSign)
-            currentNumber = "";
-            operatorSign = e.textContent;
-        } else {
-            operatorSign = e.textContent;
+        
+        if (lastNumber === "") {
             lastNumber = currentNumber;
             currentNumber = "";
+        } else if (currentNumber === ""){
+            operatorSign = e.textContent;
+            operatorSelected.textContent = operatorSign;
+            return;
+        } else {
+            display.textContent = operation(lastNumber, currentNumber, operatorSign);
+            
+            lastNumber = operation(lastNumber, currentNumber, operatorSign);
+            currentNumber = "";
         }
+
+        operatorSign = e.textContent;
+        operatorSelected.textContent = operatorSign;
     })
 })
 
@@ -50,19 +58,22 @@ operatorBtns.forEach((e) => {
 equalBtn.addEventListener("click", () => {
     // Only runs if operator has been selected
     if (operatorSign !== "") {
+        result = true;
         display.textContent = operation(lastNumber, currentNumber, operatorSign);
-        currentNumber = "";
+        currentNumber = operation(lastNumber, currentNumber, operatorSign);
         lastNumber = "";
         operatorSign = "";
+        operatorSelected.textContent = "";
     }
 })
 
 // Clear button
 clearBtn.addEventListener("click", () => {
-    currentNumber = "";
+    currentNumber = "0";
     lastNumber = "";
     operatorSign = "";
-    display.textContent = "0";
+    operatorSelected.textContent = "";
+    display.textContent = currentNumber;
 })
 
 
@@ -74,6 +85,18 @@ function subtract(num1, num2) {
     return num1 - num2;
 }
 
+function mulitply(num1, num2) {
+    return num1 * num2;
+}
+
+function divide(num1, num2) {
+    if (num2 === "0") {
+        alert("Very funny...");
+        return 0;
+    }
+    return num1 / num2;
+}
+
 function operation(num1, num2, operator) {
     switch (operator) {
         case "+":
@@ -81,5 +104,11 @@ function operation(num1, num2, operator) {
 
         case "-":
             return subtract(num1, num2);
+
+        case "*":
+            return mulitply(num1, num2);
+
+        case "/":
+            return divide(num1, num2);
     }   
 }
