@@ -61,3 +61,7 @@ button {
     margin-left: 10px;
     align-self: center;
 }
+
+.result {
+    color: green;
+}

@@ -100,6 +100,7 @@ clearBtn.addEventListener("click", () => {
 
 // Back button
 backBtn.addEventListener("click", () => {
+    result = false;
     currentNumber = currentNumber.slice(0, -1);
     updateDisplay(currentNumber);
 })
@@ -108,6 +109,10 @@ function operation(num1, num2, operator) {
 
     switch (operator) {
         case "+":
+            if ((num1 + num2) % 1 !== 0) {
+                return (Number(num1) + Number(num2)).toFixed(3);
+            }
+
             return Number(num1) + Number(num2);
 
         case "-":
@@ -132,5 +137,12 @@ function operation(num1, num2, operator) {
 
 function updateDisplay(number) {
     const display = document.querySelector(".display-number");
+
+    if (result === true) {
+        display.classList.add("result");
+    } else {
+        display.classList.remove("result");
+    }
+
     display.textContent = number;
 }
