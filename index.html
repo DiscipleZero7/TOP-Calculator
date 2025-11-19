@@ -9,40 +9,42 @@
 <body>
     <h1>Online Calculator</h1>
     <div id="calculator">
-        <div id="display">0</div>
-        <div class="all-buttons">
-            <div class="keypad-numbers">
-                <div class="bottom-row">
-                    <button class="number-button">1</button>
-                    <button class="number-button">2</button>
-                    <button class="number-button">3</button>
-                </div>
-                <div class="middle-row">
-                    <button class="number-button">4</button>
-                    <button class="number-button">5</button>
-                    <button class="number-button">6</button>
-                </div>
-                <div class="top-row">
-                    <button class="number-button">7</button>
-                    <button class="number-button">8</button>
-                    <button class="number-button">9</button>
-                </div>
-                <button class="number-button">0</button>
-            </div>
-            <div class="keypad-operators">
+        <div id="display">
+            <span class="operator-selected"></span>
+            <span class="display-number">0</span>
+        </div>
+        <div class="keypad">
+            <div class="row 1">
+                <button class="clear-button">C</button>
+                <button class="back-button">B</button>
                 <button class="operator-button">+</button>
+            </div>
+            <div class="row 2">
+                <button class="number-button">1</button>
+                <button class="number-button">2</button>
+                <button class="number-button">3</button>
                 <button class="operator-button">-</button>
+            </div>
+            <div class="row 3">
+                <button class="number-button">4</button>
+                <button class="number-button">5</button>
+                <button class="number-button">6</button>
                 <button class="operator-button">*</button>
+            </div>
+            <div class="row 4">
+                <button class="number-button">7</button>
+                <button class="number-button">8</button>
+                <button class="number-button">9</button>
                 <button class="operator-button">/</button>
             </div>
+            <div class="row 5">
+                <button class="number-button zero">0</button>
+                <button class="decimal-button">.</button>
+                <button class="equal-button">=</button>
+            </div>                
         </div>
-        <button class="decimal-button">.</button>
-        <button class="equal-button">=</button>
-        <button class="back-button">Back</button>
-        <button class="clear-button">Clear</button>
     </div>
 
-    <div class="operator-selected"></div>
     <script src="script.js"></script>
 </body>
 </html>

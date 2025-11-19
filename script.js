@@ -14,6 +14,10 @@ let result = false;
 // Number buttons
 numberBtns.forEach((e) => {
     e.addEventListener("click", () => {
+        if (currentNumber.replace(".", "").length >= 10) {
+            alert("Max digits reached!");
+            return;
+        }
 
         if (result === true) {
             currentNumber = "";
@@ -71,6 +75,13 @@ equalBtn.addEventListener("click", () => {
     if (operatorSign !== "") {
         result = true;
         currentNumber = String(operation(lastNumber, currentNumber, operatorSign));
+
+        if(currentNumber.length > 13) {
+            currentNumber = "";
+            updateDisplay("Error!");
+            return;
+        }
+
         updateDisplay(currentNumber);
         lastNumber = "";
         operatorSign = "";
@@ -80,7 +91,7 @@ equalBtn.addEventListener("click", () => {
 
 // Clear button
 clearBtn.addEventListener("click", () => {
-    currentNumber = "0";
+    currentNumber = "";
     lastNumber = "";
     operatorSign = "";
     operatorSelected.textContent = "";
@@ -109,12 +120,17 @@ function operation(num1, num2, operator) {
             if (Number(num2) === 0) {
                 alert("Very funny...");
                 return 0;
-            }       
+            }
+
+            if ((Number(num1) / Number(num2)) % 1 !== 0) {
+                return (Number(num1) / Number(num2)).toFixed(3);
+            }
+
             return Number(num1) / Number(num2);
     }   
 }
 
 function updateDisplay(number) {
-    const display = document.querySelector("#display");
+    const display = document.querySelector(".display-number");
     display.textContent = number;
 }
