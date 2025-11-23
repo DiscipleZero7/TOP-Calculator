@@ -6,31 +6,31 @@ const clearBtn = document.querySelector(".clear-button");
 const operatorSelected = document.querySelector(".operator-selected");
 const backBtn = document.querySelector(".back-button");
 
-let currentNumber = "0";
+let currentNumber = 0;
 let lastNumber = "";
-let operatorSign = null;
+let operatorSign = "";
+let decimal = false;
 let result = false;
 
 // Number buttons
 numberBtns.forEach((e) => {
     e.addEventListener("click", () => {
-        if (currentNumber.replace(".", "").length >= 10) {
-            alert("Max digits reached!");
-            return;
-        }
 
         if (result === true) {
             currentNumber = "";
             result = false;
         }
 
-        if (currentNumber === "0") {
-            currentNumber = e.textContent;
+        if (decimal === true) {
+            decimal = false;
+            currentNumber += `.${e.textContent}`;
+            updateDisplay(currentNumber);
         } else {
             currentNumber += e.textContent;
+            currentNumber = Number(currentNumber);
+            updateDisplay(currentNumber);
         }
-
-        updateDisplay(currentNumber);
+        
     })
 });
 
@@ -41,8 +41,8 @@ decimalBtn.addEventListener("click", () => {
         result = false;
     }
 
-    if (!currentNumber.includes(".") && result === false) {
-        currentNumber += ".";
+    if (!String(currentNumber).includes(".") && result === false) {
+        decimal = true;
         updateDisplay(currentNumber);
     }
 })
@@ -74,13 +74,7 @@ equalBtn.addEventListener("click", () => {
     // Only runs if operator has been selected
     if (operatorSign !== "") {
         result = true;
-        currentNumber = String(operation(lastNumber, currentNumber, operatorSign));
-
-        if(currentNumber.length > 13) {
-            currentNumber = "";
-            updateDisplay("Error!");
-            return;
-        }
+        currentNumber = operation(lastNumber, currentNumber, operatorSign);
 
         updateDisplay(currentNumber);
         lastNumber = "";
@@ -93,6 +87,7 @@ equalBtn.addEventListener("click", () => {
 clearBtn.addEventListener("click", () => {
     currentNumber = "";
     lastNumber = "";
+    decimal = false;
     operatorSign = "";
     operatorSelected.textContent = "";
     updateDisplay(currentNumber);
@@ -109,9 +104,9 @@ function operation(num1, num2, operator) {
 
     switch (operator) {
         case "+":
-            if ((num1 + num2) % 1 !== 0) {
+            /*if ((num1 + num2) % 1 !== 0) {
                 return (Number(num1) + Number(num2)).toFixed(3);
-            }
+            }*/
 
             return Number(num1) + Number(num2);
 
@@ -144,5 +139,11 @@ function updateDisplay(number) {
         display.classList.remove("result");
     }
 
-    display.textContent = number;
+    display.textContent = number.toLocaleString("en-US", {
+        maximumFractionDigits: 10
+    });
+
+    if (decimal === true) {
+        display.textContent += ".";
+    }
 }
