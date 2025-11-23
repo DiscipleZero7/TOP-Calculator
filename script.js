@@ -1,3 +1,4 @@
+const display = document.querySelector(".display-number");
 const numberBtns = document.querySelectorAll(".number-button");
 const decimalBtn = document.querySelector(".decimal-button");
 const operatorBtns = document.querySelectorAll(".operator-button");
@@ -6,144 +7,261 @@ const clearBtn = document.querySelector(".clear-button");
 const operatorSelected = document.querySelector(".operator-selected");
 const backBtn = document.querySelector(".back-button");
 
-let currentNumber = 0;
-let lastNumber = "";
-let operatorSign = "";
 let decimal = false;
+let operatorSign = null;
+let currentNumber = 0;
+let savedNumber = null;
 let result = false;
 
-// Number buttons
-numberBtns.forEach((e) => {
-    e.addEventListener("click", () => {
-
-        if (result === true) {
-            currentNumber = "";
+// Keyboard support
+document.addEventListener("keydown", (e) => {
+    const key = e.key;
+    
+    // Number keys
+    if (/^[0-9]$/.test(key)) {
+        if (result) {
             result = false;
+            display.classList.remove("result");
+            if (!saveNumber) {
+            clear();
+            }
+        }
+        updateValue(updateDisplay(key))
+    }
+
+    // Decimal key
+    if (key === ".") {
+        if (result) {
+            result = false;
+            display.classList.remove("result");
+            if (!savedNumber) {
+                clear();
+            }
         }
 
-        if (decimal === true) {
-            decimal = false;
-            currentNumber += `.${e.textContent}`;
-            updateDisplay(currentNumber);
+        if (!decimal) {
+            decimal = true;
+            updateValue(updateDisplay("."));
+        }
+    }
+
+    // Operator key
+    if (/^[+\-*\/]$/.test(key)) {
+       if (result) {
+            updateOperator(key);
+            currentNumber = null;
+            savedNumber = Number(display.textContent.replaceAll(",", ""));
+        } else if (savedNumber !== null && currentNumber !== null) {
+            operation(operatorSign);
+            updateOperator(key);
+            currentNumber = null;
+            savedNumber = Number(display.textContent.replaceAll(",", ""));
+        }
+
+        updateOperator(key);
+        if (savedNumber === null && !result) {
+            saveNumber();
+        } 
+    }
+
+    // Equal key
+    if (key === "Enter") {
+        if (savedNumber !== null && currentNumber !== null) {
+            updateDisplay("OPERATION")
         } else {
-            currentNumber += e.textContent;
-            currentNumber = Number(currentNumber);
-            updateDisplay(currentNumber);
+            alert("Invalid input");
         }
-        
-    })
-});
+    }
 
-// Decimal button
+    // Backspace key
+    if (key === "Backspace") {
+        updateValue(updateDisplay("BACKSPACE"));
+    }
+
+    // Clear key
+    if (key === "c") {
+        clear();
+    }
+})
+
+numberBtns.forEach((digit) => {
+    digit.addEventListener("click", () => {
+        if (result) {
+            result = false;
+            display.classList.remove("result");
+            if (!saveNumber) {
+            clear();
+            }
+        }
+        updateValue(updateDisplay(digit.textContent))
+    })
+})
+
 decimalBtn.addEventListener("click", () => {
-    if (result === true) {
-        currentNumber = "";
-        result = false;
-    }
+    if (result) {
+            result = false;
+            display.classList.remove("result");
+            if (!savedNumber) {
+                clear();
+            }
+        }
 
-    if (!String(currentNumber).includes(".") && result === false) {
+    if (!decimal) {
         decimal = true;
-        updateDisplay(currentNumber);
+        updateValue(updateDisplay("."));
     }
 })
 
-// Operator buttons
-operatorBtns.forEach((e) => {
-    e.addEventListener("click", () => {
-        
-        if (lastNumber === "") {
-            lastNumber = currentNumber;
-            currentNumber = "";
-        } else if (currentNumber === ""){
-            operatorSign = e.textContent;
-            operatorSelected.textContent = operatorSign;
-            return;
-        } else {
-            lastNumber = operation(lastNumber, currentNumber, operatorSign);
-            updateDisplay(lastNumber);
-            currentNumber = "";
+operatorBtns.forEach((operator) => {
+    operator.addEventListener("click", () => {
+        if (result) {
+            updateOperator(operator.textContent);
+            currentNumber = null;
+            savedNumber = Number(display.textContent.replaceAll(",", ""));
+        } else if (savedNumber !== null && currentNumber !== null) {
+            operation(operatorSign);
+            updateOperator(operator.textContent);
+            currentNumber = null;
+            savedNumber = Number(display.textContent.replaceAll(",", ""));
         }
 
-        operatorSign = e.textContent;
-        operatorSelected.textContent = operatorSign;
+        updateOperator(operator.textContent);
+        if (savedNumber === null && !result) {
+            saveNumber();
+        }
     })
 })
 
-// Equal button
 equalBtn.addEventListener("click", () => {
-    // Only runs if operator has been selected
-    if (operatorSign !== "") {
-        result = true;
-        currentNumber = operation(lastNumber, currentNumber, operatorSign);
-
-        updateDisplay(currentNumber);
-        lastNumber = "";
-        operatorSign = "";
-        operatorSelected.textContent = "";
+    if (savedNumber !== null && currentNumber !== null) {
+       updateDisplay("OPERATION")
+    } else {
+        alert("Invalid input");
     }
 })
 
-// Clear button
-clearBtn.addEventListener("click", () => {
-    currentNumber = "";
-    lastNumber = "";
-    decimal = false;
-    operatorSign = "";
-    operatorSelected.textContent = "";
-    updateDisplay(currentNumber);
-})
-
-// Back button
 backBtn.addEventListener("click", () => {
-    result = false;
-    currentNumber = currentNumber.slice(0, -1);
-    updateDisplay(currentNumber);
+    updateValue(updateDisplay("BACKSPACE"));
 })
 
-function operation(num1, num2, operator) {
+clearBtn.addEventListener("click", clear);
 
-    switch (operator) {
-        case "+":
-            /*if ((num1 + num2) % 1 !== 0) {
-                return (Number(num1) + Number(num2)).toFixed(3);
-            }*/
+function updateDisplay(value) {
 
-            return Number(num1) + Number(num2);
+    // Resets display is currentNumber and display don't match
+    if (currentNumber === null && value !== "BACKSPACE") {
+        display.textContent = "";
+    }
 
-        case "-":
-            return Number(num1) - Number(num2);
+    // Chooses between deleting a digit or appending a digit
+    // If the display is left empty after a backspace, returns null for logic
+    // If appending to the display, checks if there's enough room
+    if (value === "BACKSPACE") {
+        result = false;
+        display.classList.remove("result");
+        display.textContent = display.textContent.slice(0, -1);
+        if (display.textContent === "") {
+            return null;
+        }   
+    } else {
+        if (display.textContent.replaceAll(",", "").replaceAll(".", "").length >= 12 && !result) {
+            alert("Digit limit reached");
+        } else {
+            display.textContent += value;
+        }
+    }
 
-        case "*":
-            return Number(num1) * Number(num2);
+    if (value === "OPERATION") {
+        operation(operatorSign);
+    }
 
-        case "/":
-            if (Number(num2) === 0) {
-                alert("Very funny...");
-                return 0;
-            }
+    // Used to convert string to number for both logic and proper display
+    const converted = Number(display.textContent.replaceAll(",", ""));
 
-            if ((Number(num1) / Number(num2)) % 1 !== 0) {
-                return (Number(num1) / Number(num2)).toFixed(3);
-            }
+    // Handles comma seperation and decimal cases
+    if (!display.textContent.includes(".") && display.textContent !== "") {
+        display.textContent = converted.toLocaleString("en-US");
+        decimal = false;
+    } else if (display.textContent === ".") {
+        display.textContent = "0.";
+        return 0;
+    }
 
-            return Number(num1) / Number(num2);
-    }   
+    return converted;
 }
 
-function updateDisplay(number) {
-    const display = document.querySelector(".display-number");
+function updateValue(value) {
+    currentNumber = (value);
+}
 
-    if (result === true) {
-        display.classList.add("result");
-    } else {
-        display.classList.remove("result");
-    }
+function clear() {
+    display.textContent = "";
+    currentNumber = null;
+    savedNumber = null;
+    decimal = false;
+    updateOperator(null);
+    result = false;
+    display.classList.remove("result");
+}
 
-    display.textContent = number.toLocaleString("en-US", {
-        maximumFractionDigits: 10
-    });
+function updateOperator(sign) {
+    operatorSign = sign;
+    operatorSelected.textContent = operatorSign;
+}
 
-    if (decimal === true) {
-        display.textContent += ".";
+function saveNumber() {
+    savedNumber = currentNumber;
+    currentNumber = null;
+}
+
+function operation(sign) {
+    result = true;
+    display.classList.add("result")
+    let output;
+    switch (sign) {
+        case "+":
+            output = savedNumber + currentNumber;
+            if(output > 999999999999) {
+                alert("Exceeded max value");
+                output = 999999999999;
+            }
+
+            display.textContent = output.toLocaleString("en-US");
+            savedNumber = null;
+            currentNumber = null;
+            updateOperator(null);
+            break;
+        
+        case "-":
+            display.textContent = (savedNumber - currentNumber).toLocaleString("en-US");
+            savedNumber = null;
+            currentNumber = null;
+            updateOperator(null);
+            break;
+
+        case "*":
+            output = savedNumber * currentNumber;
+            if(output > 999999999999) {
+                alert("Exceeded max value");
+                output = 999999999999;
+            }
+
+            display.textContent = output.toLocaleString("en-US");
+            savedNumber = null;
+            currentNumber = null;
+            updateOperator(null);
+            break;
+
+        case "/":
+            if (currentNumber === 0) {
+                clear();
+                return alert("THE WORLD EXPLODED!!");
+            }
+
+            display.textContent = (savedNumber / currentNumber).toLocaleString("en-US");
+            savedNumber = null;
+            currentNumber = null;
+            updateOperator(null);
+            break;
     }
 }
